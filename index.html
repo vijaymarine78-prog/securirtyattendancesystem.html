@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Attendance System</title>
+    <title>Security Attendance System V5.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,13 +17,33 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
         }
+
+        .status-bar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-connected { background: #2ecc71; }
+        .status-disconnected { background: #e74c3c; }
 
         .header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -38,121 +54,64 @@
 
         .header h1 {
             font-size: 2em;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin-bottom: 8px;
         }
 
         .header h2 {
-            font-size: 1.3em;
+            font-size: 1.2em;
             font-weight: 300;
-            opacity: 0.9;
         }
 
-        .datetime-display {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 8px;
-            font-size: 1.1em;
+        .content { padding: 30px; }
+
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
-        .form-section {
-            padding: 30px;
+        .section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
         }
 
-        .form-group {
-            margin-bottom: 25px;
-        }
+        .form-group { margin-bottom: 20px; }
 
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #333;
-            font-size: 0.95em;
         }
 
-        input[type="text"],
-        select {
+        input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
-            transition: border-color 0.3s;
         }
 
-        input[type="text"]:focus,
-        select:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
         }
 
-        .guard-entry {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        .guard-entry h3 {
-            color: #1e3c72;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-
-        .photo-section {
-            margin-top: 15px;
-        }
-
-        .photo-preview {
-            width: 100%;
-            max-width: 400px;
-            height: 300px;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            overflow: hidden;
-            margin: 15px auto;
-        }
-
-        .photo-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-preview span {
-            color: #999;
-            font-size: 0.9em;
-        }
-
-        .photo-preview video {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: cover;
-        }
-
         .btn {
-            padding: 12px 25px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             font-size: 1em;
             cursor: pointer;
-            transition: all 0.3s;
             font-weight: 600;
+            transition: all 0.3s;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             width: 100%;
-            margin-top: 10px;
         }
 
         .btn-primary:hover {
@@ -163,15 +122,6 @@
         .btn-secondary {
             background: #28a745;
             color: white;
-            margin-right: 10px;
-            width: 100%;
-            max-width: 300px;
-            display: block;
-            margin: 10px auto;
-        }
-
-        .btn-secondary:hover {
-            background: #218838;
         }
 
         .btn-danger {
@@ -179,65 +129,86 @@
             color: white;
         }
 
-        .btn-danger:hover {
-            background: #c82333;
+        .photo-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 533px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 15px auto;
+            position: relative;
         }
 
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-            margin: 10px auto;
-            display: block;
-            max-width: 300px;
+        .photo-preview img,
+        .photo-preview video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
         }
 
-        .btn-info:hover {
-            background: #138496;
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
         }
 
-        .guards-list {
-            margin-top: 20px;
+        .alert.show { display: block; }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         .guard-item {
             background: white;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .guard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .guard-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .submit-section {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 2px solid #e0e0e0;
         }
 
         .summary {
             background: #f0f7ff;
             padding: 20px;
             border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .summary h3 {
-            color: #1e3c72;
-            margin-bottom: 15px;
+            margin: 20px 0;
         }
 
         .summary-item {
@@ -247,85 +218,9 @@
             border-bottom: 1px solid #ddd;
         }
 
-        .summary-item:last-child {
-            border-bottom: none;
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .guard-info {
-                grid-template-columns: 1fr;
-            }
-        }
-
         #pdfReport {
             background: white;
             padding: 30px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .report-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #1e3c72;
-        }
-
-        .report-header h1 {
-            color: #1e3c72;
-            margin-bottom: 5px;
-        }
-
-        .report-header h2 {
-            color: #666;
-            font-size: 1.2em;
-            margin-bottom: 15px;
         }
 
         .report-table {
@@ -338,7 +233,6 @@
         .report-table td {
             border: 1px solid #ddd;
             padding: 12px;
-            text-align: left;
         }
 
         .report-table th {
@@ -346,765 +240,801 @@
             color: white;
         }
 
-        .report-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        .camera-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .add-new-section {
-            background: #e8f4f8;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .add-new-section button {
-            max-width: 250px;
+        .report-table img {
+            width: 80px;
+            height: 107px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal show">
+        <div class="modal-content">
+            <div class="modal-title">🔐 Admin Login</div>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="loginUsername" value="admin">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="admin123">
+            </div>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="cameraModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">📷 Select Camera</div>
+            <button class="btn btn-primary" onclick="selectCamera('environment')">📷 Back Camera</button>
+            <button class="btn btn-primary" onclick="selectCamera('user')" style="margin-top: 10px;">🤳 Front Camera</button>
+            <button class="btn btn-danger" onclick="closeCameraModal()" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div>
+                <span class="status-indicator" id="statusDot"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+            <button class="btn btn-secondary" onclick="logout()" style="padding: 8px 16px;">Logout</button>
+        </div>
+
+        <!-- Header -->
         <div class="header">
             <h1>Security Attendance System</h1>
             <h2>RNA Courtyard CHS Ltd.</h2>
-            <div class="datetime-display" id="datetime"></div>
+            <div id="datetime" style="margin-top: 15px;"></div>
         </div>
 
-        <div class="form-section">
-            <div id="alertBox" class="hidden"></div>
+        <!-- Main Content -->
+        <div class="content">
+            <div id="alertBox" class="alert"></div>
 
-            <!-- Add New Personnel to Database Section -->
-            <div class="add-new-section">
-                <h3 style="color: #1e3c72; margin-bottom: 10px;">📋 Database Management</h3>
-                <p style="color: #666; margin-bottom: 15px;">Add new security agencies or personnel to the master database</p>
-                <button type="button" class="btn btn-info" onclick="showAddToDatabase()">
-                    ➕ Add New Agency/Personnel
-                </button>
+            <!-- Add Personnel -->
+            <div class="section">
+                <h3>📋 Add Personnel to Database</h3>
+                <button class="btn btn-primary" onclick="showAddForm()">➕ Add New Personnel</button>
             </div>
 
-            <!-- Add to Database Form (Hidden by default) -->
-            <div id="addDatabaseForm" class="guard-entry" style="display: none;">
-                <h3>Add to Master Database</h3>
-                
-                <div class="form-group">
-                    <label for="dbAgencyName">Security Agency Name *</label>
-                    <input type="text" id="dbAgencyName" placeholder="Enter new agency name">
-                </div>
+            <div id="addForm" style="display: none;">
+                <div class="section">
+                    <h3>Personnel Information</h3>
+                    
+                    <div class="form-group">
+                        <label>Agency Selection *</label>
+                        <select id="agencyChoice" onchange="toggleAgency()">
+                            <option value="">Select Option</option>
+                            <option value="existing">Existing Agency</option>
+                            <option value="new">New Agency</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="dbPersonnelName">Security Personnel Name *</label>
-                    <input type="text" id="dbPersonnelName" placeholder="Enter personnel name">
-                </div>
-
-                <div class="form-group">
-                    <label for="dbDesignation">Designation *</label>
-                    <select id="dbDesignation">
-                        <option value="">Select Designation</option>
-                        <option value="Security Guard">Security Guard</option>
-                        <option value="Security Supervisor">Security Supervisor</option>
-                        <option value="Security Officer">Security Officer</option>
-                        <option value="Chief Security Officer">Chief Security Officer</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-primary" onclick="addToDatabase()">
-                        💾 Save to Database
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="cancelAddDatabase()">
-                        ✖ Cancel
-                    </button>
-                </div>
-            </div>
-
-            <!-- Main Attendance Form -->
-            <div class="form-group">
-                <label for="agencyName">Select Security Agency *</label>
-                <select id="agencyName" required onchange="loadPersonnelByAgency()">
-                    <option value="">Select Agency</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="shiftTiming">Shift Timing *</label>
-                <select id="shiftTiming" required>
-                    <option value="">Select Shift</option>
-                    <option value="0800 AM - 0800 PM">0800 AM - 0800 PM</option>
-                    <option value="0800 PM - 0800 AM">0800 PM - 0800 AM</option>
-                </select>
-            </div>
-
-            <div class="guard-entry">
-                <h3>Mark Attendance for Security Personnel</h3>
-                
-                <div class="form-group">
-                    <label for="guardName">Select Security Personnel *</label>
-                    <select id="guardName" onchange="autoFillDesignation()">
-                        <option value="">First select an agency</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="designation">Designation *</label>
-                    <input type="text" id="designation" readonly style="background-color: #f0f0f0;">
-                </div>
-
-                <div class="form-group">
-                    <label for="postLocation">Posted Location *</label>
-                    <select id="postLocation">
-                        <option value="">Select Location</option>
-                        <option value="Main Gate">Main Gate</option>
-                        <option value="Back Gate">Back Gate</option>
-                        <option value="Parking Area">Parking Area</option>
-                        <option value="Lobby">Lobby</option>
-                        <option value="Roving">Roving</option>
-                        <option value="CCTV Room">CCTV Room</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Capture Photo (Camera Only) *</label>
-                    <div class="photo-section">
-                        <div class="photo-preview" id="photoPreview">
-                            <span>Click "Open Camera" to capture photo</span>
-                        </div>
-                        <div class="camera-controls">
-                            <button type="button" class="btn btn-secondary" onclick="openCamera()">
-                                📷 Open Camera
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="closeCamera()" id="closeCameraBtn" style="display: none;">
-                                ✖ Close Camera
-                            </button>
+                    <div id="existingAgencyDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>Existing Agency *</label>
+                            <select id="existingAgency"></select>
                         </div>
                     </div>
-                </div>
 
-                <button type="button" class="btn btn-primary" onclick="addGuard()">
-                    ✅ Mark Attendance
-                </button>
+                    <div id="newAgencyDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>New Agency Name *</label>
+                            <input type="text" id="newAgency">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Personnel Name *</label>
+                        <input type="text" id="personnelName">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Designation *</label>
+                        <select id="designation">
+                            <option value="">Select</option>
+                            <option>Security Guard</option>
+                            <option>Security Supervisor</option>
+                            <option>Security Officer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contact Number *</label>
+                        <input type="tel" id="contact" maxlength="10" pattern="[0-9]{10}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Deployment Date *</label>
+                        <input type="date" id="deploymentDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Default Shift *</label>
+                        <select id="defaultShift">
+                            <option value="">Select</option>
+                            <option>Day Shift</option>
+                            <option>Night Shift</option>
+                            <option>Flexible</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photo (Optional)</label>
+                        <div class="photo-preview" id="addPhotoPreview">
+                            <span>Click camera to capture</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openAddCamera()">📷 Open Camera</button>
+                        <button class="btn btn-danger" onclick="closeAddCamera()" id="closeAddCameraBtn" style="display: none;">✖ Close</button>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="savePersonnel()">💾 Save Personnel</button>
+                    <button class="btn btn-danger" onclick="hideAddForm()" style="margin-top: 10px;">✖ Cancel</button>
+                </div>
             </div>
 
-            <div class="guards-list" id="guardsList"></div>
-
-            <div class="submit-section">
-                <div class="summary" id="summary">
-                    <h3>Attendance Summary</h3>
-                    <div class="summary-item">
-                        <span>Total Security Personnel:</span>
-                        <strong id="totalGuards">0</strong>
-                    </div>
-                    <div class="summary-item">
-                        <span>Date:</span>
-                        <strong id="summaryDate"></strong>
-                    </div>
-                    <div class="summary-item">
-                        <span>Shift:</span>
-                        <strong id="summaryShift">Not selected</strong>
-                    </div>
+            <!-- Mark Attendance -->
+            <div class="section">
+                <h3>Daily Attendance</h3>
+                
+                <div class="form-group">
+                    <label>Agency *</label>
+                    <select id="agency" onchange="loadPersonnel()">
+                        <option value="">Select Agency</option>
+                    </select>
                 </div>
 
-                <button type="button" class="btn btn-primary" onclick="submitAttendance()" style="font-size: 1.1em; padding: 15px;">
-                    📊 Submit Attendance & Generate Report
-                </button>
+                <div class="form-group">
+                    <label>Shift *</label>
+                    <select id="shift">
+                        <option value="">Select Shift</option>
+                        <option value="0800 AM - 0800 PM">0800 AM - 0800 PM (Day)</option>
+                        <option value="0800 PM - 0800 AM">0800 PM - 0800 AM (Night)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Personnel *</label>
+                    <select id="personnel" onchange="fillDetails()">
+                        <option value="">First select agency</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Designation</label>
+                    <input type="text" id="attDesignation" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" id="attContact" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Location *</label>
+                    <select id="location">
+                        <option value="">Select</option>
+                        <option>Main Gate</option>
+                        <option>Back Gate</option>
+                        <option>Parking Area</option>
+                        <option>Lobby</option>
+                        <option>Roving</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Photo *</label>
+                    <div class="photo-preview" id="attPhotoPreview">
+                        <span>Click camera to capture</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openAttCamera()">📷 Open Camera</button>
+                    <button class="btn btn-danger" onclick="closeAttCamera()" id="closeAttCameraBtn" style="display: none;">✖ Close</button>
+                </div>
+
+                <button class="btn btn-primary" onclick="markAttendance()">✅ Mark Present</button>
             </div>
+
+            <div id="guardsList"></div>
+
+            <div class="summary">
+                <h3>Summary</h3>
+                <div class="summary-item">
+                    <span>Total Present:</span>
+                    <strong id="totalGuards">0</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Date:</span>
+                    <strong id="summaryDate"></strong>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="submitAttendance()" style="font-size: 1.1em; padding: 15px;">
+                📊 Submit & Generate PDF
+            </button>
         </div>
     </div>
 
-    <!-- Hidden PDF Report Template -->
+    <!-- PDF Report -->
     <div id="pdfReport" style="display:none;">
-        <div class="report-header">
+        <div style="text-align: center; margin-bottom: 30px;">
             <h1>Security Attendance Report</h1>
             <h2>RNA Courtyard CHS Ltd.</h2>
-            <p id="reportDateTime"></p>
-            <p id="reportAgency"></p>
-            <p id="reportShift"></p>
+            <p id="reportInfo"></p>
         </div>
-        <table class="report-table" id="reportTable">
+        <table class="report-table">
             <thead>
                 <tr>
                     <th>S.No</th>
+                    <th>Photo</th>
                     <th>Name</th>
                     <th>Designation</th>
+                    <th>Contact</th>
                     <th>Location</th>
-                    <th>Check-in Time</th>
+                    <th>Check-in</th>
                 </tr>
             </thead>
-            <tbody id="reportTableBody"></tbody>
+            <tbody id="reportBody"></tbody>
         </table>
-        <div style="margin-top: 30px;">
-            <p><strong>Total Personnel Present: <span id="reportTotal"></span></strong></p>
-        </div>
+        <p style="margin-top: 20px;"><strong>Total: <span id="reportTotal"></span></strong></p>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION - GOOGLE SHEETS INTEGRATION
-        // ==========================================
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIG
+        // ═══════════════════════════════════════════════════════════════════
         
-        // REPLACE WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
-        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbx2z_jXqyL-6s0Xz_L2GaxswBA_TF2wk4S_NvhSRG-xMUQKmQVz4NtMEraO106LRGHwFQ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw2dTXMyDj5z-S0_6pOakRnq07SEaRHkfY6GGVuiTWWnUQNoqLV8dUamFjs0bJXEkS_/exec';
         
-        // ==========================================
-        // GLOBAL VARIABLES
-        // ==========================================
-        
-        let guards = [];
-        let currentPhotoData = null;
-        let videoStream = null;
-        let personnelDatabase = [];
-        let agencyDatabase = [];
+        let state = {
+            credentials: null,
+            database: { agencies: [], personnel: [] },
+            guards: [],
+            addPhoto: null,
+            attPhoto: null,
+            addStream: null,
+            attStream: null
+        };
 
-        // ==========================================
-        // DATE AND TIME MANAGEMENT
-        // ==========================================
+        // ═══════════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════════
         
+        window.addEventListener('load', () => {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
         function updateDateTime() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('datetime').textContent = now.toLocaleDateString('en-IN', options);
+            document.getElementById('datetime').textContent = now.toLocaleString('en-IN');
             document.getElementById('summaryDate').textContent = now.toLocaleDateString('en-IN');
         }
 
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        // Update shift summary
-        document.getElementById('shiftTiming').addEventListener('change', function() {
-            document.getElementById('summaryShift').textContent = this.value || 'Not selected';
-        });
-
-        // ==========================================
-        // CAMERA FUNCTIONALITY
-        // ==========================================
+        // ═══════════════════════════════════════════════════════════════════
+        // LOGIN
+        // ═══════════════════════════════════════════════════════════════════
         
-        async function openCamera() {
-            try {
-                // Request camera access with rear camera preference
-                const constraints = {
-                    video: {
-                        facingMode: { ideal: "environment" }, // Prefer rear camera
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    }
-                };
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!username || !password) {
+                alert('Enter username and password');
+                return;
+            }
 
-                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
                 
-                const videoElement = document.createElement('video');
-                videoElement.setAttribute('playsinline', '');
-                videoElement.setAttribute('autoplay', '');
-                videoElement.style.width = '100%';
-                videoElement.style.height = '100%';
-                videoElement.style.objectFit = 'cover';
-                
-                const photoPreview = document.getElementById('photoPreview');
-                photoPreview.innerHTML = '';
-                photoPreview.appendChild(videoElement);
-                
-                videoElement.srcObject = videoStream;
-                
-                // Add capture button
-                const captureBtn = document.createElement('button');
-                captureBtn.type = 'button';
-                captureBtn.className = 'btn btn-secondary';
-                captureBtn.textContent = '📸 Capture Photo';
-                captureBtn.onclick = capturePhotoFromCamera;
-                captureBtn.style.position = 'absolute';
-                captureBtn.style.bottom = '10px';
-                captureBtn.style.left = '50%';
-                captureBtn.style.transform = 'translateX(-50%)';
-                captureBtn.style.width = 'auto';
-                
-                photoPreview.style.position = 'relative';
-                photoPreview.appendChild(captureBtn);
-                
-                document.getElementById('closeCameraBtn').style.display = 'inline-block';
-                
-                showAlert('Camera opened! Click "Capture Photo" when ready.', 'success');
+                if (result.status === 'success') {
+                    state.credentials = { username, password };
+                    document.getElementById('loginModal').classList.remove('show');
+                    document.getElementById('mainApp').style.display = 'block';
+                    updateStatus('connected', 'Connected');
+                    await loadDatabase();
+                    showAlert('Login successful!', 'success');
+                } else {
+                    alert(result.message);
+                }
             } catch (error) {
-                console.error('Camera error:', error);
-                showAlert('Unable to access camera. Please ensure camera permissions are granted.', 'error');
+                alert('Login failed: ' + error.message);
             }
         }
 
-        function capturePhotoFromCamera() {
-            const videoElement = document.querySelector('#photoPreview video');
-            if (!videoElement) {
-                showAlert('No camera active.', 'error');
+        function logout() {
+            if (confirm('Logout?')) {
+                location.reload();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STATUS
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function updateStatus(status, text) {
+            document.getElementById('statusDot').className = 'status-indicator status-' + status;
+            document.getElementById('statusText').textContent = text;
+        }
+
+        function showAlert(msg, type) {
+            const alert = document.getElementById('alertBox');
+            alert.className = 'alert alert-' + type + ' show';
+            alert.textContent = msg;
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DATABASE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        async function loadDatabase() {
+            try {
+                const response = await fetch(API_URL + '?action=getDatabase');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    state.database = result.data;
+                    
+                    // Update agency dropdowns
+                    const agencies = state.database.agencies;
+                    
+                    document.getElementById('existingAgency').innerHTML = '<option value="">Select</option>' +
+                        agencies.map(a => '<option>' + a + '</option>').join('');
+                    
+                    document.getElementById('agency').innerHTML = '<option value="">Select</option>' +
+                        agencies.map(a => '<option>' + a + '</option>').join('');
+                }
+            } catch (error) {
+                console.error('Load DB error:', error);
+            }
+        }
+
+        function toggleAgency() {
+            const choice = document.getElementById('agencyChoice').value;
+            document.getElementById('existingAgencyDiv').style.display = choice === 'existing' ? 'block' : 'none';
+            document.getElementById('newAgencyDiv').style.display = choice === 'new' ? 'block' : 'none';
+        }
+
+        function getAgency() {
+            const choice = document.getElementById('agencyChoice').value;
+            if (choice === 'existing') return document.getElementById('existingAgency').value;
+            if (choice === 'new') return document.getElementById('newAgency').value.trim();
+            return '';
+        }
+
+        function showAddForm() {
+            document.getElementById('addForm').style.display = 'block';
+        }
+
+        function hideAddForm() {
+            document.getElementById('addForm').style.display = 'none';
+            clearAddForm();
+        }
+
+        function clearAddForm() {
+            document.getElementById('agencyChoice').value = '';
+            document.getElementById('newAgency').value = '';
+            document.getElementById('personnelName').value = '';
+            document.getElementById('designation').value = '';
+            document.getElementById('contact').value = '';
+            document.getElementById('deploymentDate').value = '';
+            document.getElementById('defaultShift').value = '';
+            document.getElementById('addPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            state.addPhoto = null;
+            toggleAgency();
+        }
+
+        async function savePersonnel() {
+            const agency = getAgency();
+            const name = document.getElementById('personnelName').value.trim();
+            const designation = document.getElementById('designation').value;
+            const contact = document.getElementById('contact').value.trim();
+            const deploymentDate = document.getElementById('deploymentDate').value;
+            const shift = document.getElementById('defaultShift').value;
+
+            if (!agency || !name || !designation || !contact || !deploymentDate || !shift) {
+                alert('Fill all required fields');
                 return;
             }
+
+            if (!/^\d{10}$/.test(contact)) {
+                alert('Enter valid 10-digit contact');
+                return;
+            }
+
+            try {
+                updateStatus('syncing', 'Saving...');
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'addPersonnel',
+                        username: state.credentials.username,
+                        password: state.credentials.password,
+                        agency: agency,
+                        name: name,
+                        designation: designation,
+                        contact: contact,
+                        deploymentDate: deploymentDate,
+                        shift: shift,
+                        photo: state.addPhoto
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('Personnel added!', 'success');
+                    hideAddForm();
+                    await loadDatabase();
+                    updateStatus('connected', 'Connected');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Save failed: ' + error.message);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CAMERA - ADD
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function openAddCamera() {
+            document.getElementById('cameraModal').classList.add('show');
+            state.cameraMode = 'add';
+        }
+
+        function closeAddCamera() {
+            if (state.addStream) {
+                state.addStream.getTracks().forEach(t => t.stop());
+                state.addStream = null;
+            }
+            document.getElementById('closeAddCameraBtn').style.display = 'none';
+            if (!state.addPhoto) {
+                document.getElementById('addPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            }
+        }
+
+        async function startAddCamera(mode) {
+            try {
+                state.addStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: mode, width: 900, height: 1200 }
+                });
+
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsinline = true;
+                video.srcObject = state.addStream;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+
+                const preview = document.getElementById('addPhotoPreview');
+                preview.innerHTML = '';
+                preview.appendChild(video);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = '📸 Capture';
+                btn.style.position = 'absolute';
+                btn.style.bottom = '10px';
+                btn.onclick = captureAddPhoto;
+                preview.appendChild(btn);
+
+                document.getElementById('closeAddCameraBtn').style.display = 'inline-block';
+            } catch (error) {
+                alert('Camera error: ' + error.message);
+            }
+        }
+
+        function captureAddPhoto() {
+            const video = document.querySelector('#addPhotoPreview video');
+            if (!video) return;
 
             const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            
-            const context = canvas.getContext('2d');
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            
-            currentPhotoData = canvas.toDataURL('image/jpeg', 0.8);
-            
-            // Display captured photo
-            const photoPreview = document.getElementById('photoPreview');
-            photoPreview.innerHTML = `<img src="${currentPhotoData}" alt="Captured Photo">`;
-            
-            closeCamera();
-            showAlert('Photo captured successfully!', 'success');
+            canvas.width = 900;
+            canvas.height = 1200;
+            canvas.getContext('2d').drawImage(video, 0, 0, 900, 1200);
+
+            state.addPhoto = canvas.toDataURL('image/jpeg', 0.7);
+            document.getElementById('addPhotoPreview').innerHTML = '<img src="' + state.addPhoto + '">';
+            closeAddCamera();
         }
 
-        function closeCamera() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-            
-            document.getElementById('closeCameraBtn').style.display = 'none';
-            
-            if (!currentPhotoData) {
-                document.getElementById('photoPreview').innerHTML = '<span>Click "Open Camera" to capture photo</span>';
-            }
-        }
-
-        // ==========================================
-        // DATABASE MANAGEMENT
-        // ==========================================
+        // ═══════════════════════════════════════════════════════════════════
+        // CAMERA - ATTENDANCE
+        // ═══════════════════════════════════════════════════════════════════
         
-        function showAddToDatabase() {
-            document.getElementById('addDatabaseForm').style.display = 'block';
-            document.getElementById('addDatabaseForm').scrollIntoView({ behavior: 'smooth' });
+        function openAttCamera() {
+            document.getElementById('cameraModal').classList.add('show');
+            state.cameraMode = 'att';
         }
 
-        function cancelAddDatabase() {
-            document.getElementById('addDatabaseForm').style.display = 'none';
-            clearDatabaseForm();
-        }
-
-        function clearDatabaseForm() {
-            document.getElementById('dbAgencyName').value = '';
-            document.getElementById('dbPersonnelName').value = '';
-            document.getElementById('dbDesignation').value = '';
-        }
-
-        async function addToDatabase() {
-            const agencyName = document.getElementById('dbAgencyName').value.trim();
-            const personnelName = document.getElementById('dbPersonnelName').value.trim();
-            const designation = document.getElementById('dbDesignation').value;
-
-            if (!agencyName || !personnelName || !designation) {
-                showAlert('Please fill in all fields to add to database.', 'error');
-                return;
+        function closeAttCamera() {
+            if (state.attStream) {
+                state.attStream.getTracks().forEach(t => t.stop());
+                state.attStream = null;
             }
+            document.getElementById('closeAttCameraBtn').style.display = 'none';
+            if (!state.attPhoto) {
+                document.getElementById('attPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            }
+        }
 
-            const dbEntry = {
-                action: 'addToDatabase',
-                timestamp: new Date().toISOString(),
-                agencyName: agencyName,
-                personnelName: personnelName,
-                designation: designation
-            };
-
+        async function startAttCamera(mode) {
             try {
-                showAlert('Adding to database...', 'info');
-                
-                await sendToGoogleSheets(dbEntry);
-                
-                // Add to local cache
-                if (!agencyDatabase.includes(agencyName)) {
-                    agencyDatabase.push(agencyName);
-                }
-                
-                personnelDatabase.push({
-                    agency: agencyName,
-                    name: personnelName,
-                    designation: designation
+                state.attStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: mode, width: 900, height: 1200 }
                 });
 
-                showAlert('Successfully added to database!', 'success');
-                clearDatabaseForm();
-                cancelAddDatabase();
-                
-                // Refresh dropdowns
-                loadAgencies();
-                
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsinline = true;
+                video.srcObject = state.attStream;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+
+                const preview = document.getElementById('attPhotoPreview');
+                preview.innerHTML = '';
+                preview.appendChild(video);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = '📸 Capture';
+                btn.style.position = 'absolute';
+                btn.style.bottom = '10px';
+                btn.onclick = captureAttPhoto;
+                preview.appendChild(btn);
+
+                document.getElementById('closeAttCameraBtn').style.display = 'inline-block';
             } catch (error) {
-                console.error('Error adding to database:', error);
-                showAlert('Error adding to database. Please try again.', 'error');
+                alert('Camera error: ' + error.message);
             }
         }
 
-        async function loadDatabaseFromSheets() {
-            try {
-                // This will be handled by the Google Apps Script
-                // For now, we'll use local storage as fallback
-                const response = await fetch(GOOGLE_SHEET_URL + '?action=getDatabase');
-                const data = await response.json();
-                
-                if (data.agencies) {
-                    agencyDatabase = data.agencies;
-                }
-                if (data.personnel) {
-                    personnelDatabase = data.personnel;
-                }
-                
-                loadAgencies();
-            } catch (error) {
-                console.log('Using local data');
-                // Load from localStorage as fallback
-                const storedAgencies = localStorage.getItem('agencyDatabase');
-                const storedPersonnel = localStorage.getItem('personnelDatabase');
-                
-                if (storedAgencies) agencyDatabase = JSON.parse(storedAgencies);
-                if (storedPersonnel) personnelDatabase = JSON.parse(storedPersonnel);
-                
-                loadAgencies();
+        function captureAttPhoto() {
+            const video = document.querySelector('#attPhotoPreview video');
+            if (!video) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 900;
+            canvas.height = 1200;
+            canvas.getContext('2d').drawImage(video, 0, 0, 900, 1200);
+
+            state.attPhoto = canvas.toDataURL('image/jpeg', 0.7);
+            document.getElementById('attPhotoPreview').innerHTML = '<img src="' + state.attPhoto + '">';
+            closeAttCamera();
+        }
+
+        function closeCameraModal() {
+            document.getElementById('cameraModal').classList.remove('show');
+        }
+
+        function selectCamera(mode) {
+            closeCameraModal();
+            if (state.cameraMode === 'add') {
+                startAddCamera(mode);
+            } else {
+                startAttCamera(mode);
             }
         }
 
-        function loadAgencies() {
-            const agencySelect = document.getElementById('agencyName');
-            agencySelect.innerHTML = '<option value="">Select Agency</option>';
+        // ═══════════════════════════════════════════════════════════════════
+        // ATTENDANCE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function loadPersonnel() {
+            const agency = document.getElementById('agency').value;
+            const select = document.getElementById('personnel');
             
-            const uniqueAgencies = [...new Set(agencyDatabase)];
-            uniqueAgencies.forEach(agency => {
-                const option = document.createElement('option');
-                option.value = agency;
-                option.textContent = agency;
-                agencySelect.appendChild(option);
+            select.innerHTML = '<option value="">Select</option>';
+            
+            if (!agency) return;
+            
+            const filtered = state.database.personnel.filter(p => p.agency === agency);
+            filtered.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.dataset.designation = p.designation;
+                opt.dataset.contact = p.contact;
+                opt.dataset.photo = p.photoUrl;
+                opt.textContent = p.name;
+                select.appendChild(opt);
             });
-            
-            // Save to localStorage
-            localStorage.setItem('agencyDatabase', JSON.stringify(agencyDatabase));
-            localStorage.setItem('personnelDatabase', JSON.stringify(personnelDatabase));
         }
 
-        function loadPersonnelByAgency() {
-            const selectedAgency = document.getElementById('agencyName').value;
-            const personnelSelect = document.getElementById('guardName');
+        function fillDetails() {
+            const select = document.getElementById('personnel');
+            const opt = select.options[select.selectedIndex];
             
-            personnelSelect.innerHTML = '<option value="">Select Personnel</option>';
-            
-            if (!selectedAgency) {
-                personnelSelect.innerHTML = '<option value="">First select an agency</option>';
-                document.getElementById('designation').value = '';
-                return;
-            }
-            
-            const filteredPersonnel = personnelDatabase.filter(p => p.agency === selectedAgency);
-            
-            if (filteredPersonnel.length === 0) {
-                personnelSelect.innerHTML = '<option value="">No personnel found for this agency</option>';
-            } else {
-                filteredPersonnel.forEach(person => {
-                    const option = document.createElement('option');
-                    option.value = person.name;
-                    option.setAttribute('data-designation', person.designation);
-                    option.textContent = person.name;
-                    personnelSelect.appendChild(option);
-                });
-            }
-            
-            document.getElementById('designation').value = '';
-        }
-
-        function autoFillDesignation() {
-            const personnelSelect = document.getElementById('guardName');
-            const selectedOption = personnelSelect.options[personnelSelect.selectedIndex];
-            
-            if (selectedOption && selectedOption.value) {
-                const designation = selectedOption.getAttribute('data-designation');
-                document.getElementById('designation').value = designation || '';
-            } else {
-                document.getElementById('designation').value = '';
+            if (opt && opt.value) {
+                document.getElementById('attDesignation').value = opt.dataset.designation || '';
+                document.getElementById('attContact').value = opt.dataset.contact || '';
             }
         }
 
-        // ==========================================
-        // ATTENDANCE MANAGEMENT
-        // ==========================================
-        
-        function addGuard() {
-            const agencyName = document.getElementById('agencyName').value;
-            const guardName = document.getElementById('guardName').value;
-            const designation = document.getElementById('designation').value;
-            const postLocation = document.getElementById('postLocation').value;
+        function markAttendance() {
+            const agency = document.getElementById('agency').value;
+            const personnel = document.getElementById('personnel').value;
+            const designation = document.getElementById('attDesignation').value;
+            const contact = document.getElementById('attContact').value;
+            const location = document.getElementById('location').value;
 
-            if (!agencyName) {
-                showAlert('Please select a security agency.', 'error');
+            if (!agency || !personnel || !location) {
+                alert('Fill all required fields');
                 return;
             }
 
-            if (!guardName || !designation || !postLocation) {
-                showAlert('Please fill in all personnel details.', 'error');
+            if (!state.attPhoto) {
+                alert('Capture photo first');
                 return;
             }
 
-            if (!currentPhotoData) {
-                showAlert('Please capture a photo using the camera.', 'error');
-                return;
-            }
+            const select = document.getElementById('personnel');
+            const photoUrl = select.options[select.selectedIndex].dataset.photo || '';
 
-            // Check if guard already marked attendance
-            const alreadyMarked = guards.find(g => g.name === guardName);
-            if (alreadyMarked) {
-                showAlert('This personnel has already been marked present.', 'error');
-                return;
-            }
-
-            const guard = {
+            state.guards.push({
                 id: Date.now(),
-                agency: agencyName,
-                name: guardName,
+                name: personnel,
                 designation: designation,
-                location: postLocation,
-                photo: currentPhotoData,
-                checkInTime: new Date().toLocaleTimeString(),
-                checkInDateTime: new Date().toISOString()
-            };
+                contact: contact,
+                location: location,
+                checkInTime: new Date().toLocaleTimeString('en-IN'),
+                photo: state.attPhoto,
+                photoUrl: photoUrl
+            });
 
-            guards.push(guard);
             displayGuards();
-            clearGuardForm();
-            updateSummary();
-            showAlert('Attendance marked successfully!', 'success');
+            clearAttForm();
+            showAlert('Marked present!', 'success');
         }
 
         function displayGuards() {
-            const guardsList = document.getElementById('guardsList');
+            const list = document.getElementById('guardsList');
             
-            if (guards.length === 0) {
-                guardsList.innerHTML = '';
+            if (state.guards.length === 0) {
+                list.innerHTML = '';
                 return;
             }
 
-            guardsList.innerHTML = '<h3 style="margin-bottom: 15px; color: #1e3c72;">📋 Attendance Marked</h3>';
+            list.innerHTML = '<div class="section"><h3>📋 Marked Present</h3></div>';
             
-            guards.forEach(guard => {
-                const guardItem = document.createElement('div');
-                guardItem.className = 'guard-item';
-                guardItem.innerHTML = `
-                    <div class="guard-header">
-                        <strong>${guard.name}</strong>
-                        <button class="btn btn-danger" onclick="removeGuard(${guard.id})">Remove</button>
-                    </div>
-                    <div class="guard-info">
-                        <div><strong>Agency:</strong> ${guard.agency}</div>
-                        <div><strong>Designation:</strong> ${guard.designation}</div>
-                        <div><strong>Location:</strong> ${guard.location}</div>
-                        <div><strong>Check-in:</strong> ${guard.checkInTime}</div>
-                    </div>
+            state.guards.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'guard-item';
+                div.innerHTML = `
+                    <strong>${g.name}</strong> - ${g.designation} - ${g.location}
+                    <button class="btn btn-danger" onclick="removeGuard(${g.id})" style="float: right; padding: 5px 10px;">Remove</button>
                 `;
-                guardsList.appendChild(guardItem);
+                list.appendChild(div);
             });
+
+            document.getElementById('totalGuards').textContent = state.guards.length;
         }
 
         function removeGuard(id) {
-            if (confirm('Are you sure you want to remove this attendance record?')) {
-                guards = guards.filter(g => g.id !== id);
-                displayGuards();
-                updateSummary();
-                showAlert('Attendance record removed.', 'success');
-            }
+            state.guards = state.guards.filter(g => g.id !== id);
+            displayGuards();
         }
 
-        function clearGuardForm() {
-            document.getElementById('guardName').value = '';
-            document.getElementById('designation').value = '';
-            document.getElementById('postLocation').value = '';
-            document.getElementById('photoPreview').innerHTML = '<span>Click "Open Camera" to capture photo</span>';
-            currentPhotoData = null;
-            closeCamera();
+        function clearAttForm() {
+            document.getElementById('personnel').value = '';
+            document.getElementById('attDesignation').value = '';
+            document.getElementById('attContact').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('attPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            state.attPhoto = null;
         }
 
-        function updateSummary() {
-            document.getElementById('totalGuards').textContent = guards.length;
-        }
-
-        // ==========================================
-        // ALERT SYSTEM
-        // ==========================================
-        
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.className = `alert alert-${type}`;
-            alertBox.textContent = message;
-            alertBox.classList.remove('hidden');
-            
-            setTimeout(() => {
-                alertBox.classList.add('hidden');
-            }, 5000);
-        }
-
-        // ==========================================
-        // SUBMIT ATTENDANCE
-        // ==========================================
-        
         async function submitAttendance() {
-            const agencyName = document.getElementById('agencyName').value;
-            const shiftTiming = document.getElementById('shiftTiming').value;
+            const agency = document.getElementById('agency').value;
+            const shift = document.getElementById('shift').value;
 
-            if (!agencyName || !shiftTiming) {
-                showAlert('Please select Agency and Shift Timing.', 'error');
+            if (!agency || !shift || state.guards.length === 0) {
+                alert('Select agency, shift and mark at least one person');
                 return;
             }
 
-            if (guards.length === 0) {
-                showAlert('Please mark attendance for at least one personnel.', 'error');
+            if (!confirm('Submit attendance for ' + state.guards.length + ' personnel?')) {
                 return;
             }
-
-            if (!confirm(`Submit attendance for ${guards.length} personnel?`)) {
-                return;
-            }
-
-            showAlert('Submitting attendance to Google Sheets...', 'info');
-
-            const attendanceData = {
-                action: 'submitAttendance',
-                date: new Date().toLocaleDateString('en-IN'),
-                time: new Date().toLocaleTimeString('en-IN'),
-                agency: agencyName,
-                shift: shiftTiming,
-                totalGuards: guards.length,
-                guards: guards.map(g => ({
-                    name: g.name,
-                    designation: g.designation,
-                    location: g.location,
-                    checkInTime: g.checkInTime,
-                    checkInDateTime: g.checkInDateTime
-                }))
-            };
 
             try {
-                await sendToGoogleSheets(attendanceData);
-                showAlert('Attendance submitted successfully to Google Sheets!', 'success');
-                
-                setTimeout(() => {
-                    generatePDF(attendanceData);
-                }, 1000);
+                updateStatus('syncing', 'Submitting...');
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'submitAttendance',
+                        date: new Date().toLocaleDateString('en-IN'),
+                        time: new Date().toLocaleTimeString('en-IN'),
+                        agency: agency,
+                        shift: shift,
+                        totalGuards: state.guards.length,
+                        guards: state.guards
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('Submitted!', 'success');
+                    updateStatus('connected', 'Connected');
+                    setTimeout(() => generatePDF(agency, shift), 1000);
+                } else {
+                    alert(result.message);
+                }
             } catch (error) {
-                console.error('Error:', error);
-                showAlert('Attendance saved locally. Generating PDF...', 'error');
-                generatePDF(attendanceData);
+                alert('Submit failed: ' + error.message);
             }
         }
 
-        // ==========================================
-        // GOOGLE SHEETS INTEGRATION
-        // ==========================================
-        
-        async function sendToGoogleSheets(data) {
-            if (GOOGLE_SHEET_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                console.warn('Google Sheets URL not configured');
-                throw new Error('Please configure Google Sheets Web App URL');
-            }
+        function generatePDF(agency, shift) {
+            document.getElementById('reportInfo').textContent = 
+                'Agency: ' + agency + ' | Shift: ' + shift + ' | Date: ' + new Date().toLocaleDateString('en-IN');
+            
+            const tbody = document.getElementById('reportBody');
+            tbody.innerHTML = '';
 
-            const response = await fetch(GOOGLE_SHEET_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            return response;
-        }
-
-        // ==========================================
-        // PDF GENERATION
-        // ==========================================
-        
-        function generatePDF(data) {
-            document.getElementById('reportDateTime').textContent = 
-                `Date: ${data.date} | Time: ${data.time}`;
-            document.getElementById('reportAgency').textContent = 
-                `Security Agency: ${data.agency}`;
-            document.getElementById('reportShift').textContent = 
-                `Shift: ${data.shift}`;
-            document.getElementById('reportTotal').textContent = data.totalGuards;
-
-            const tableBody = document.getElementById('reportTableBody');
-            tableBody.innerHTML = '';
-
-            data.guards.forEach((guard, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${guard.name}</td>
-                    <td>${guard.designation}</td>
-                    <td>${guard.location}</td>
-                    <td>${guard.checkInTime}</td>
+            state.guards.forEach((g, i) => {
+                const photo = g.photoUrl || g.photo || '';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><img src="${photo}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'80\\' height=\\'107\\'><text x=\\'50%\\' y=\\'50%\\' text-anchor=\\'middle\\'>No Photo</text></svg>'"></td>
+                        <td>${g.name}</td>
+                        <td>${g.designation}</td>
+                        <td>${g.contact}</td>
+                        <td>${g.location}</td>
+                        <td>${g.checkInTime}</td>
+                    </tr>
                 `;
-                tableBody.appendChild(row);
             });
+
+            document.getElementById('reportTotal').textContent = state.guards.length;
 
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('pdfReport');
-            
-            html2canvas(element, {
-                scale: 2,
-                logging: false,
-                useCORS: true
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                
-                const fileName = `Security_Attendance_${data.date.replace(/\//g, '-')}_${data.shift.replace(/\s/g, '_')}.pdf`;
-                pdf.save(fileName);
 
-                showAlert('PDF generated! You can now share it on WhatsApp.', 'success');
-                
-                if (confirm('Attendance submitted and PDF generated. Reset form for new entry?')) {
-                    resetForm();
-                }
-            });
+            setTimeout(() => {
+                html2canvas(element, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    pdf.save('Attendance_' + new Date().toISOString().slice(0,10) + '.pdf');
+
+                    if (confirm('PDF generated! Reset for new entry?')) {
+                        resetForm();
+                    }
+                });
+            }, 1500);
         }
 
-        // ==========================================
-        // FORM RESET
-        // ==========================================
-        
         function resetForm() {
-            guards = [];
-            document.getElementById('agencyName').value = '';
-            document.getElementById('shiftTiming').value = '';
-            clearGuardForm();
+            state.guards = [];
+            document.getElementById('agency').value = '';
+            document.getElementById('shift').value = '';
+            clearAttForm();
             displayGuards();
-            updateSummary();
-            document.getElementById('summaryShift').textContent = 'Not selected';
         }
-
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
-        
-        window.addEventListener('load', function() {
-            loadDatabaseFromSheets();
-        });
-
-        // Clean up camera on page unload
-        window.addEventListener('beforeunload', function() {
-            closeCamera();
-        });
     </script>
 </body>
 </html>
