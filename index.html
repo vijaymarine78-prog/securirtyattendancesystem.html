@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Security Attendance System V6.0 - RNA Courtyard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        @media (min-width: 769px) {
+            body {
+                padding: 20px;
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .status-bar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-connected { background: #2ecc71; }
+        .status-disconnected { background: #e74c3c; }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .header h2 {
+            font-size: 1.2em;
+            font-weight: 300;
+        }
+
+        .content { padding: 30px; }
+
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 533px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 15px auto;
+            position: relative;
+        }
+
+        .photo-preview img,
+        .photo-preview video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show { display: block; }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .guard-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* PDF template — pushed off-screen so html2canvas can render it */
+        #pdfReport {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 794px;          /* A4 at 96 dpi = 794 px */
+            background: #ffffff;
+            padding: 40px 36px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #222;
+            z-index: -1;
+        }
+
+        #pdfReport h1 {
+            font-size: 22px;
+            margin: 0 0 4px;
+            color: #1e3c72;
+        }
+        #pdfReport h2 {
+            font-size: 16px;
+            font-weight: 400;
+            margin: 0 0 2px;
+            color: #34495e;
+        }
+        #pdfReport .report-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 18px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #ccc;
+            padding: 8px 6px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        .report-table th {
+            background: #1e3c72;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .report-table td:nth-child(3) {
+            text-align: left;          /* Name left-aligned */
+        }
+
+        .report-table .photo-cell img {
+            width: 54px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        #pdfReport .report-footer {
+            margin-top: 24px;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .footer-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+
+        .footer-dev {
+            font-size: 13px;
+            margin-top: 10px;
+            color: #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal show">
+        <div class="modal-content">
+            <div class="modal-title">🔐 Admin Login</div>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="loginUsername" value="admin">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="admin123">
+            </div>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="cameraModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">📷 Select Camera</div>
+            <button class="btn btn-primary" onclick="selectCamera('environment')">📷 Back Camera</button>
+            <button class="btn btn-primary" onclick="selectCamera('user')" style="margin-top: 10px;">🤳 Front Camera</button>
+            <button class="btn btn-danger" onclick="closeCameraModal()" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div>
+                <span class="status-indicator" id="statusDot"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+            <button class="btn btn-secondary" onclick="logout()" style="padding: 8px 16px;">Logout</button>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>Security Attendance System</h1>
+            <h2>RNA Courtyard CHS Ltd.</h2>
+            <div id="datetime" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <div id="alertBox" class="alert"></div>
+
+            <!-- Add Personnel -->
+            <div class="section">
+                <h3>📋 Add Personnel to Database</h3>
+                <button class="btn btn-primary" onclick="showAddForm()">➕ Add New Personnel</button>
+            </div>
+
+            <div id="addForm" style="display: none;">
+                <div class="section">
+                    <h3>Personnel Information</h3>
+                    
+                    <div class="form-group">
+                        <label>Agency Selection *</label>
+                        <select id="agencyChoice" onchange="toggleAgency()">
+                            <option value="">Select Option</option>
+                            <option value="existing">Existing Agency</option>
+                            <option value="new">New Agency</option>
+                        </select>
+                    </div>
+
+                    <div id="existingAgencyDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>Existing Agency *</label>
+                            <select id="existingAgency"></select>
+                        </div>
+                    </div>
+
+                    <div id="newAgencyDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>New Agency Name *</label>
+                            <input type="text" id="newAgency">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Personnel Name *</label>
+                        <input type="text" id="personnelName">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Designation *</label>
+                        <select id="designation">
+                            <option value="">Select</option>
+                            <option>Security Guard</option>
+                            <option>Security Supervisor</option>
+                            <option>Security Officer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contact Number *</label>
+                        <input type="tel" id="contact" maxlength="10" pattern="[0-9]{10}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Deployment Date *</label>
+                        <input type="date" id="deploymentDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Default Shift *</label>
+                        <select id="defaultShift">
+                            <option value="">Select</option>
+                            <option>Day Shift</option>
+                            <option>Night Shift</option>
+                            <option>Flexible</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photo (Optional)</label>
+                        <div class="photo-preview" id="addPhotoPreview">
+                            <span>Click camera to capture</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openAddCamera()">📷 Open Camera</button>
+                        <button class="btn btn-danger" onclick="closeAddCamera()" id="closeAddCameraBtn" style="display: none;">✖ Close</button>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="savePersonnel()">💾 Save Personnel</button>
+                    <button class="btn btn-danger" onclick="hideAddForm()" style="margin-top: 10px;">✖ Cancel</button>
+                </div>
+            </div>
+
+            <!-- Mark Attendance -->
+            <div class="section">
+                <h3>Daily Attendance</h3>
+                
+                <div class="form-group">
+                    <label>Agency *</label>
+                    <select id="agency" onchange="loadPersonnel()">
+                        <option value="">Select Agency</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Shift *</label>
+                    <select id="shift">
+                        <option value="">Select Shift</option>
+                        <option value="0800 AM - 0800 PM">0800 AM - 0800 PM (Day)</option>
+                        <option value="0800 PM - 0800 AM">0800 PM - 0800 AM (Night)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Personnel *</label>
+                    <select id="personnel" onchange="fillDetails()">
+                        <option value="">First select agency</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Designation</label>
+                    <input type="text" id="attDesignation" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" id="attContact" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Location *</label>
+                    <select id="location">
+                        <option value="">Select</option>
+                        <option>Main Gate</option>
+                        <option>Back Gate</option>
+                        <option>Parking Area</option>
+                        <option>Lobby</option>
+                        <option>Roving</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Photo *</label>
+                    <div class="photo-preview" id="attPhotoPreview">
+                        <span>Click camera to capture</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openAttCamera()">📷 Open Camera</button>
+                    <button class="btn btn-danger" onclick="closeAttCamera()" id="closeAttCameraBtn" style="display: none;">✖ Close</button>
+                </div>
+
+                <button class="btn btn-primary" onclick="markAttendance()">✅ Mark Present</button>
+            </div>
+
+            <div id="guardsList"></div>
+
+            <div class="summary">
+                <h3>Summary</h3>
+                <div class="summary-item">
+                    <span>Total Present:</span>
+                    <strong id="totalGuards">0</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Date:</span>
+                    <strong id="summaryDate"></strong>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="submitAttendance()" style="font-size: 1.1em; padding: 15px;">
+                📊 Submit & Generate PDF
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-title">© 2026 RNA Courtyard Co-operative Housing Society Ltd. All rights reserved.</div>
+            <div class="footer-dev">Designed and Developed by: Capt. Vijay A. Varma</div>
+            <div style="font-size: 11px; margin-top: 8px; color: #bbb;">
+                Unauthorized reproduction, modification, or distribution is strictly prohibited.
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Report template (rendered off-screen, NOT display:none) -->
+    <div id="pdfReport">
+        <div style="text-align:center; margin-bottom: 6px;">
+            <h1>Security Attendance Report</h1>
+            <h2>RNA Courtyard Co-operative Housing Society Ltd.</h2>
+            <div class="report-meta" id="reportInfo"></div>
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">S.No</th>
+                    <th style="width:70px;">Photo</th>
+                    <th style="width:150px;">Name</th>
+                    <th style="width:100px;">Designation</th>
+                    <th style="width:100px;">Contact</th>
+                    <th style="width:90px;">Location</th>
+                    <th style="width:90px;">Check-in</th>
+                </tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+        </table>
+        <p style="margin-top:14px; font-size:14px;"><strong>Total Guards Present: <span id="reportTotal">0</span></strong></p>
+        <div class="report-footer">
+            © 2026 RNA Courtyard Co-operative Housing Society Ltd. All rights reserved.<br>
+            Designed and Developed by Capt. Vijay A. Varma | Unauthorised reproduction is strictly prohibited.
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIG
+        // ═══════════════════════════════════════════════════════════════════
+        
+        const API_URL = 'https://script.google.com/macros/s/AKfycbygl3vNPOQ8zgUrrmMRky_FMs5RpzMIgq7gYCCtszyMvm_eqstlbfE-xQti4DbbFEpQ/exec';
+        const VERSION = '6.0';
+        
+        let state = {
+            credentials: null,
+            database: { agencies: [], personnel: [] },
+            guards: [],
+            addPhoto: null,
+            attPhoto: null,
+            addStream: null,
+            attStream: null
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════════
+        
+        window.addEventListener('load', () => {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('datetime').textContent = now.toLocaleString('en-IN');
+            document.getElementById('summaryDate').textContent = now.toLocaleDateString('en-IN');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // LOGIN
+        // ═══════════════════════════════════════════════════════════════════
+        
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!username || !password) {
+                alert('Enter username and password');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    state.credentials = { username, password };
+                    document.getElementById('loginModal').classList.remove('show');
+                    document.getElementById('mainApp').style.display = 'block';
+                    updateStatus('connected', 'Connected');
+                    await loadDatabase();
+                    showAlert('Login successful!', 'success');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                location.reload();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STATUS
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function updateStatus(status, text) {
+            document.getElementById('statusDot').className = 'status-indicator status-' + status;
+            document.getElementById('statusText').textContent = text;
+        }
+
+        function showAlert(msg, type) {
+            const alert = document.getElementById('alertBox');
+            alert.className = 'alert alert-' + type + ' show';
+            alert.textContent = msg;
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DATABASE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        async function loadDatabase() {
+            try {
+                const response = await fetch(API_URL + '?action=getDatabase');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    state.database = result.data;
+                    
+                    // Update agency dropdowns
+                    const agencies = state.database.agencies;
+                    
+                    document.getElementById('existingAgency').innerHTML = '<option value="">Select</option>' +
+                        agencies.map(a => '<option>' + a + '</option>').join('');
+                    
+                    document.getElementById('agency').innerHTML = '<option value="">Select</option>' +
+                        agencies.map(a => '<option>' + a + '</option>').join('');
+                }
+            } catch (error) {
+                console.error('Load DB error:', error);
+            }
+        }
+
+        function toggleAgency() {
+            const choice = document.getElementById('agencyChoice').value;
+            document.getElementById('existingAgencyDiv').style.display = choice === 'existing' ? 'block' : 'none';
+            document.getElementById('newAgencyDiv').style.display = choice === 'new' ? 'block' : 'none';
+        }
+
+        function getAgency() {
+            const choice = document.getElementById('agencyChoice').value;
+            if (choice === 'existing') return document.getElementById('existingAgency').value;
+            if (choice === 'new') return document.getElementById('newAgency').value.trim();
+            return '';
+        }
+
+        function showAddForm() {
+            document.getElementById('addForm').style.display = 'block';
+        }
+
+        function hideAddForm() {
+            document.getElementById('addForm').style.display = 'none';
+            clearAddForm();
+        }
+
+        function clearAddForm() {
+            document.getElementById('agencyChoice').value = '';
+            document.getElementById('newAgency').value = '';
+            document.getElementById('personnelName').value = '';
+            document.getElementById('designation').value = '';
+            document.getElementById('contact').value = '';
+            document.getElementById('deploymentDate').value = '';
+            document.getElementById('defaultShift').value = '';
+            document.getElementById('addPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            state.addPhoto = null;
+            toggleAgency();
+        }
+
+        async function savePersonnel() {
+            const agency = getAgency();
+            const name = document.getElementById('personnelName').value.trim();
+            const designation = document.getElementById('designation').value;
+            const contact = document.getElementById('contact').value.trim();
+            const deploymentDate = document.getElementById('deploymentDate').value;
+            const shift = document.getElementById('defaultShift').value;
+
+            if (!agency || !name || !designation || !contact || !deploymentDate || !shift) {
+                alert('Fill all required fields');
+                return;
+            }
+
+            if (!/^\d{10}$/.test(contact)) {
+                alert('Enter valid 10-digit contact');
+                return;
+            }
+
+            try {
+                updateStatus('syncing', 'Saving...');
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'addPersonnel',
+                        username: state.credentials.username,
+                        password: state.credentials.password,
+                        agency: agency,
+                        name: name,
+                        designation: designation,
+                        contact: contact,
+                        deploymentDate: deploymentDate,
+                        shift: shift,
+                        photo: state.addPhoto
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('Personnel added!', 'success');
+                    hideAddForm();
+                    await loadDatabase();
+                    updateStatus('connected', 'Connected');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Save failed: ' + error.message);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CAMERA - ADD
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function openAddCamera() {
+            document.getElementById('cameraModal').classList.add('show');
+            state.cameraMode = 'add';
+        }
+
+        function closeAddCamera() {
+            if (state.addStream) {
+                state.addStream.getTracks().forEach(t => t.stop());
+                state.addStream = null;
+            }
+            document.getElementById('closeAddCameraBtn').style.display = 'none';
+            if (!state.addPhoto) {
+                document.getElementById('addPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            }
+        }
+
+        async function startAddCamera(mode) {
+            try {
+                state.addStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: mode, width: 900, height: 1200 }
+                });
+
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsinline = true;
+                video.srcObject = state.addStream;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+
+                const preview = document.getElementById('addPhotoPreview');
+                preview.innerHTML = '';
+                preview.appendChild(video);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = '📸 Capture';
+                btn.style.position = 'absolute';
+                btn.style.bottom = '10px';
+                btn.onclick = captureAddPhoto;
+                preview.appendChild(btn);
+
+                document.getElementById('closeAddCameraBtn').style.display = 'inline-block';
+            } catch (error) {
+                alert('Camera error: ' + error.message);
+            }
+        }
+
+        function captureAddPhoto() {
+            const video = document.querySelector('#addPhotoPreview video');
+            if (!video) return;
+
+            const canvas = document.createElement('canvas');
+            
+            // Image optimization: 3:4 ratio, max 2MP (1200x1600)
+            canvas.width = 1200;
+            canvas.height = 1600;
+            canvas.getContext('2d').drawImage(video, 0, 0, 1200, 1600);
+
+            // Compress to 80% quality
+            state.addPhoto = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Show size
+            const sizeKB = Math.round((state.addPhoto.length * 3/4) / 1024);
+            console.log('Photo size:', sizeKB, 'KB');
+            
+            document.getElementById('addPhotoPreview').innerHTML = '<img src="' + state.addPhoto + '">';
+            closeAddCamera();
+            showAlert('Photo captured (' + sizeKB + ' KB)', 'success');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CAMERA - ATTENDANCE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function openAttCamera() {
+            document.getElementById('cameraModal').classList.add('show');
+            state.cameraMode = 'att';
+        }
+
+        function closeAttCamera() {
+            if (state.attStream) {
+                state.attStream.getTracks().forEach(t => t.stop());
+                state.attStream = null;
+            }
+            document.getElementById('closeAttCameraBtn').style.display = 'none';
+            if (!state.attPhoto) {
+                document.getElementById('attPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            }
+        }
+
+        async function startAttCamera(mode) {
+            try {
+                state.attStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: mode, width: 900, height: 1200 }
+                });
+
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsinline = true;
+                video.srcObject = state.attStream;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+
+                const preview = document.getElementById('attPhotoPreview');
+                preview.innerHTML = '';
+                preview.appendChild(video);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-secondary';
+                btn.textContent = '📸 Capture';
+                btn.style.position = 'absolute';
+                btn.style.bottom = '10px';
+                btn.onclick = captureAttPhoto;
+                preview.appendChild(btn);
+
+                document.getElementById('closeAttCameraBtn').style.display = 'inline-block';
+            } catch (error) {
+                alert('Camera error: ' + error.message);
+            }
+        }
+
+        function captureAttPhoto() {
+            const video = document.querySelector('#attPhotoPreview video');
+            if (!video) return;
+
+            const canvas = document.createElement('canvas');
+            
+            // Image optimization: 3:4 ratio, max 2MP (1200x1600)
+            canvas.width = 1200;
+            canvas.height = 1600;
+            canvas.getContext('2d').drawImage(video, 0, 0, 1200, 1600);
+
+            // Compress to 80% quality
+            state.attPhoto = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Show size
+            const sizeKB = Math.round((state.attPhoto.length * 3/4) / 1024);
+            console.log('Photo size:', sizeKB, 'KB');
+            
+            document.getElementById('attPhotoPreview').innerHTML = '<img src="' + state.attPhoto + '">';
+            closeAttCamera();
+            showAlert('Photo captured (' + sizeKB + ' KB)', 'success');
+        }
+
+        function closeCameraModal() {
+            document.getElementById('cameraModal').classList.remove('show');
+        }
+
+        function selectCamera(mode) {
+            closeCameraModal();
+            if (state.cameraMode === 'add') {
+                startAddCamera(mode);
+            } else {
+                startAttCamera(mode);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ATTENDANCE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        function loadPersonnel() {
+            const agency = document.getElementById('agency').value;
+            const select = document.getElementById('personnel');
+            
+            select.innerHTML = '<option value="">Select</option>';
+            
+            if (!agency) return;
+            
+            const filtered = state.database.personnel.filter(p => p.agency === agency);
+            filtered.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.dataset.designation = p.designation;
+                opt.dataset.contact = p.contact;
+                opt.dataset.photo = p.photoUrl;
+                opt.textContent = p.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function fillDetails() {
+            const select = document.getElementById('personnel');
+            const opt = select.options[select.selectedIndex];
+            
+            if (opt && opt.value) {
+                document.getElementById('attDesignation').value = opt.dataset.designation || '';
+                document.getElementById('attContact').value = opt.dataset.contact || '';
+            }
+        }
+
+        function markAttendance() {
+            const agency = document.getElementById('agency').value;
+            const personnel = document.getElementById('personnel').value;
+            const designation = document.getElementById('attDesignation').value;
+            const contact = document.getElementById('attContact').value;
+            const location = document.getElementById('location').value;
+
+            if (!agency || !personnel || !location) {
+                alert('Fill all required fields');
+                return;
+            }
+
+            if (!state.attPhoto) {
+                alert('Capture photo first');
+                return;
+            }
+
+            const select = document.getElementById('personnel');
+            const photoUrl = select.options[select.selectedIndex].dataset.photo || '';
+
+            state.guards.push({
+                id: Date.now(),
+                name: personnel,
+                designation: designation,
+                contact: contact,
+                location: location,
+                checkInTime: new Date().toLocaleTimeString('en-IN'),
+                photo: state.attPhoto,
+                photoUrl: photoUrl
+            });
+
+            displayGuards();
+            clearAttForm();
+            
+            // Show confirmation popup
+            alert('✅ Your attendance has been recorded successfully.');
+            showAlert('Attendance recorded for ' + personnel, 'success');
+        }
+
+        function displayGuards() {
+            const list = document.getElementById('guardsList');
+            
+            if (state.guards.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = '<div class="section"><h3>📋 Marked Present</h3></div>';
+            
+            state.guards.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'guard-item';
+                div.innerHTML = `
+                    <strong>${g.name}</strong> - ${g.designation} - ${g.location}
+                    <button class="btn btn-danger" onclick="removeGuard(${g.id})" style="float: right; padding: 5px 10px;">Remove</button>
+                `;
+                list.appendChild(div);
+            });
+
+            document.getElementById('totalGuards').textContent = state.guards.length;
+        }
+
+        function removeGuard(id) {
+            state.guards = state.guards.filter(g => g.id !== id);
+            displayGuards();
+        }
+
+        function clearAttForm() {
+            document.getElementById('personnel').value = '';
+            document.getElementById('attDesignation').value = '';
+            document.getElementById('attContact').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('attPhotoPreview').innerHTML = '<span>Click camera to capture</span>';
+            state.attPhoto = null;
+        }
+
+        async function submitAttendance() {
+            const agency = document.getElementById('agency').value;
+            const shift = document.getElementById('shift').value;
+
+            if (!agency || !shift || state.guards.length === 0) {
+                alert('Select agency, shift and mark at least one person');
+                return;
+            }
+
+            if (!confirm('Submit attendance for ' + state.guards.length + ' personnel?')) {
+                return;
+            }
+
+            try {
+                updateStatus('syncing', 'Submitting...');
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'submitAttendance',
+                        date: new Date().toLocaleDateString('en-IN'),
+                        time: new Date().toLocaleTimeString('en-IN'),
+                        agency: agency,
+                        shift: shift,
+                        totalGuards: state.guards.length,
+                        guards: state.guards
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    updateStatus('connected', 'Connected');
+                    
+                    // Show success confirmation
+                    alert('✅ Attendance submitted successfully!\n\nGenerating PDF report...');
+                    showAlert('Submission successful! Generating PDF...', 'success');
+                    
+                    setTimeout(() => generatePDF(agency, shift), 1000);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Submit failed: ' + error.message);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // PDF GENERATION  (fully rewritten)
+        // ═══════════════════════════════════════════════════════════════════
+
+        function generatePDF(agency, shift) {
+            try {
+                // ── 1. Fill the off-screen template ────────────────────────
+                document.getElementById('reportInfo').textContent =
+                    'Agency: ' + agency +
+                    '  |  Shift: ' + shift +
+                    '  |  Date: ' + new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+                const tbody = document.getElementById('reportBody');
+                tbody.innerHTML = '';
+
+                state.guards.forEach((g, i) => {
+                    const tr = document.createElement('tr');
+
+                    // S.No
+                    tr.innerHTML += '<td>' + (i + 1) + '</td>';
+
+                    // Photo  — use the base64 captured image directly; no external URL needed
+                    const photoSrc = g.photo || g.photoUrl || '';
+                    if (photoSrc) {
+                        tr.innerHTML += '<td class="photo-cell"><img src="' + photoSrc + '" alt="Photo"></td>';
+                    } else {
+                        tr.innerHTML += '<td style="color:#999; font-size:11px;">No<br>Photo</td>';
+                    }
+
+                    // Text columns
+                    tr.innerHTML += '<td style="text-align:left;">' + g.name + '</td>';
+                    tr.innerHTML += '<td>' + g.designation + '</td>';
+                    tr.innerHTML += '<td>' + g.contact + '</td>';
+                    tr.innerHTML += '<td>' + g.location + '</td>';
+                    tr.innerHTML += '<td>' + g.checkInTime + '</td>';
+
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('reportTotal').textContent = state.guards.length;
+
+                // ── 2. Wait a tick so the DOM paints, then capture ─────────
+                setTimeout(function () {
+                    const element = document.getElementById('pdfReport');
+
+                    html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    })
+                 .then(function (canvas) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    const A4_W = 210;
+    const A4_H = 297;
+    const imgW = A4_W;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (imgH <= A4_H) {
+        // Corrected: .toDataURL
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgW, imgH);
+    } else {
+        const pageHeightPx = (A4_H / imgW) * canvas.width;
+        let yOffset = 0;
+        let pageIndex = 0;
+
+        while (yOffset < canvas.height) {
+            if (pageIndex > 0) pdf.addPage();
+
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = Math.min(pageHeightPx, canvas.height - yOffset);
+
+            const ctx = pageCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, -yOffset, canvas.width, canvas.height);
+
+            // Corrected: .toDataURL
+            pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, imgW, A4_H);
+            yOffset += pageHeightPx;
+            pageIndex++;
+        }
+    }
+    // ... rest of your code
+
+                        // ── 3. Save / trigger download ──────────────────────
+                        const fileName = 'Attendance_' +
+                            agency.replace(/\s+/g, '_') + '_' +
+                            new Date().toISOString().slice(0, 10) + '.pdf';
+
+                        pdf.save(fileName);
+
+                        // ── 4. Confirmation ─────────────────────────────────
+                        alert('✅ PDF Report Generated!\n\nFile: ' + fileName + '\nSaved to your Downloads folder.');
+
+                        if (confirm('Reset form for next entry?')) {
+                            resetForm();
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error('html2canvas error:', err);
+                        alert('❌ PDF generation failed:\n' + err.message + '\n\nPlease try again.');
+                    });
+
+                }, 600);   // short delay so images paint
+
+            } catch (err) {
+                console.error('generatePDF outer error:', err);
+                alert('❌ PDF error: ' + err.message);
+            }
+        }
+
+        function resetForm() {
+            state.guards = [];
+            document.getElementById('agency').value = '';
+            document.getElementById('shift').value = '';
+            clearAttForm();
+            displayGuards();
+        }
+    </script>
+</body>
+</html>
